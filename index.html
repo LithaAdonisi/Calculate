@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<!-- saved from url=(0032)http://127.0.0.1:5500/Index.html -->
+<html lang="en" data-theme="dark" suppresshydrationwarning="true" data-qb-installed="true"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>calculatoR</title>
+
+    <!-- PWA Manifest and Theme Color -->
+    <link rel="manifest" href="http://127.0.0.1:5500/manifest.json">
+    <meta name="theme-color" content="#000000">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./calculatoR_files/css2" rel="stylesheet">
+    <style>
+        /* CSS Variables for theming */
+        :root {
+            /* Shared Colors */
+            --operator-bg: #007AFF; /* Blue for operators */
+            --digit-bg: #2C2D31;    /* Black for digits */
+            --border-grey: #D4D4D2; /* Added for the display border */
+
+            /* Light Theme */
+            --light-bg: #F9F9F9;
+            --light-calc-bg: #FFFFFF;
+            --light-display-text: #333333;
+            --light-display-bg: #FFFFFF; /* Matched to calculator background */
+            --light-header-text: #444444;
+            --light-digit-text: #FF9F0A; /* Orange digit text */
+            --light-clear-bg: #D4D4D2;
+            --light-clear-text: #1C1C1E;
+            --light-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+            /* Dark Theme */
+            --dark-bg: #1C1C1E;
+            --dark-calc-bg: #000000;
+            --dark-display-text: #FFFFFF;
+            --dark-display-bg: #000000; /* Matched to calculator background */
+            --dark-header-text: #8E8E93;
+            --dark-digit-text: #FFFFFF; /* White digit text */
+            --dark-clear-bg: #505053;
+            --dark-clear-text: #FFFFFF;
+            --dark-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* General Body Styles */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Theme application */
+        [data-theme="light"] {
+            background-color: var(--light-bg);
+        }
+        [data-theme="dark"] {
+            background-color: var(--dark-bg);
+        }
+
+        /* Calculator Container */
+        .calculator {
+            width: 100%;
+            max-width: 375px;
+            padding: 25px;
+            border-radius: 40px;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        [data-theme="light"] .calculator {
+            background-color: var(--light-calc-bg);
+            box-shadow: var(--light-shadow);
+        }
+        [data-theme="dark"] .calculator {
+            background-color: var(--dark-calc-bg);
+            box-shadow: var(--dark-shadow);
+        }
+
+        /* Header with Title and Toggle */
+        .calculator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+        [data-theme="light"] .header-title {
+            color: var(--light-header-text);
+        }
+        [data-theme="dark"] .header-title {
+            color: var(--dark-header-text);
+        }
+
+        /* Theme Toggle Switch */
+        .theme-toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3A3A3C;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #D4D4D2;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Display Screen */
+        .calculator-display {
+            width: 100%;
+            text-align: right;
+            padding: 20px; /* Adjusted padding */
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+            word-break: break-all;
+            border-radius: 25px; /* UPDATED corner radius */
+            border: 2px solid var(--border-grey); /* ADDED border */
+            transition: background-color 0.3s ease; /* Added transition */
+        }
+        [data-theme="light"] .calculator-display {
+             background-color: var(--light-display-bg);
+        }
+        [data-theme="dark"] .calculator-display {
+             background-color: var(--dark-display-bg);
+        }
+
+        .previous-operand {
+            min-height: 24px;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: color 0.3s ease;
+        }
+        .current-operand {
+            min-height: 60px;
+            font-size: 3.5rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        [data-theme="light"] .previous-operand,
+        [data-theme="light"] .current-operand {
+            color: var(--light-display-text);
+        }
+        [data-theme="dark"] .previous-operand,
+        [data-theme="dark"] .current-operand {
+            color: var(--dark-display-text);
+        }
+        
+
+        /* Button Grid */
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        /* General Button Styles */
+        .btn {
+            border: none;
+            border-radius: 50%; /* Makes buttons circular */
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            height: 70px; /* Consistent height */
+            width: 70px;  /* Consistent width */
+            margin: auto; /* Center in grid cell */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: filter 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+        .btn:hover {
+            filter: brightness(1.2);
+        }
+        .btn:active {
+            filter: brightness(0.9);
+        }
+
+        /* Specific Button Styles */
+        .btn-digit {
+            background-color: var(--digit-bg); /* Same black for both themes */
+        }
+        [data-theme="light"] .btn-digit {
+            color: var(--light-digit-text);
+        }
+        [data-theme="dark"] .btn-digit {
+            color: var(--dark-digit-text);
+        }
+
+        .btn-operator {
+            background-color: var(--operator-bg); /* Same blue for both themes */
+            color: white;
+        }
+
+        .btn-clear {
+             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        [data-theme="light"] .btn-clear {
+            background-color: var(--light-clear-bg);
+            color: var(--light-clear-text);
+        }
+        [data-theme="dark"] .btn-clear {
+            background-color: var(--dark-clear-bg);
+            color: var(--dark-clear-text);
+        }
+        
+        .btn-zero {
+            grid-column: span 2;
+            width: 155px; /* Double width + gap */
+            border-radius: 35px; /* Pill shape */
+            justify-content: flex-start;
+            padding-left: 25px;
+        }
+
+    </style>
+<style type="text/css">.lf-progress {
+  -webkit-appearance: none;
+  -moz-apperance: none;
+  width: 100%;
+  /* margin: 0 10px; */
+  height: 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.lf-progress:focus {
+  outline: none;
+  border: none;
+}
+.lf-progress::-moz-range-track {
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
+.lf-progress::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  height: 13px;
+  width: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress::-moz-range-thumb {
+  -moz-appearance: none !important;
+  height: 13px;
+  width: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress::-ms-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+.lf-progress::-ms-fill-lower {
+  background: #ccc;
+  border-radius: 3px;
+}
+.lf-progress::-ms-fill-upper {
+  background: #ccc;
+  border-radius: 3px;
+}
+.lf-progress::-ms-thumb {
+  border: 0;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  background: #0fccce;
+  cursor: pointer;
+}
+.lf-progress:focus::-ms-fill-lower {
+  background: #ccc;
+}
+.lf-progress:focus::-ms-fill-upper {
+  background: #ccc;
+}
+.lf-player-container :focus {
+  outline: 0;
+}
+.lf-popover {
+  position: relative;
+}
+
+.lf-popover-content {
+  display: inline-block;
+  position: absolute;
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -10px);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  transition: all 0.3s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+}
+
+.lf-popover-content.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0px);
+}
+
+.lf-player-btn-container {
+  display: flex;
+  align-items: center;
+}
+.lf-player-btn {
+  cursor: pointer;
+  fill: #999;
+  width: 14px;
+}
+
+.lf-player-btn.active {
+  fill: #555;
+}
+
+.lf-popover {
+  position: relative;
+}
+
+.lf-popover-content {
+  display: inline-block;
+  position: absolute;
+  background-color: #ffffff;
+  opacity: 1;
+
+  transform: translate(0, -10px);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  transition: all 0.3s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+  padding: 10px;
+}
+
+.lf-popover-content.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0px);
+}
+
+.lf-arrow {
+  position: absolute;
+  z-index: -1;
+  content: '';
+  bottom: -9px;
+  border-style: solid;
+  border-width: 10px 10px 0px 10px;
+}
+
+.lf-left-align,
+.lf-left-align .lfarrow {
+  left: 0;
+  right: unset;
+}
+
+.lf-right-align,
+.lf-right-align .lf-arrow {
+  right: 0;
+  left: unset;
+}
+
+.lf-text-input {
+  border: 1px #ccc solid;
+  border-radius: 5px;
+  padding: 3px;
+  width: 60px;
+  margin: 0;
+}
+
+.lf-color-picker {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 90px;
+}
+
+.lf-color-selectors {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.lf-color-component {
+  display: flex;
+  flex-direction: row;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.lf-color-component strong {
+  width: 40px;
+}
+
+.lf-color-component input[type='range'] {
+  margin: 0 0 0 10px;
+}
+
+.lf-color-component input[type='number'] {
+  width: 50px;
+  margin: 0 0 0 10px;
+}
+
+.lf-color-preview {
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 5px;
+}
+
+.lf-preview {
+  height: 60px;
+  width: 60px;
+}
+
+.lf-popover-snapshot {
+  width: 150px;
+}
+.lf-popover-snapshot h5 {
+  margin: 5px 0 10px 0;
+  font-size: 0.75rem;
+}
+.lf-popover-snapshot a {
+  display: block;
+  text-decoration: none;
+}
+.lf-popover-snapshot a:before {
+  content: '⥼';
+  margin-right: 5px;
+}
+.lf-popover-snapshot .lf-note {
+  display: block;
+  margin-top: 10px;
+  color: #999;
+}
+.lf-player-controls > div {
+  margin-right: 5px;
+  margin-left: 5px;
+}
+.lf-player-controls > div:first-child {
+  margin-left: 0px;
+}
+.lf-player-controls > div:last-child {
+  margin-right: 0px;
+}
+</style></head>
+<body data-new-gr-c-s-check-loaded="14.1241.0" data-gr-ext-installed="">
+
+    <div class="calculator">
+        <div class="calculator-header">
+            <div class="header-title">calculatoR =R=</div>
+            <label class="theme-toggle">
+                <input type="checkbox" id="themeToggleCheckbox">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="calculator-display">
+            <div class="previous-operand" data-previous-operand=""></div>
+            <div class="current-operand" data-current-operand="">0</div>
+        </div>
+
+        <div class="calculator-buttons">
+            <!-- Row 1 -->
+            <button class="btn btn-clear" data-all-clear="">AC</button>
+            <button class="btn btn-clear" data-delete="">DEL</button>
+            <button class="btn btn-operator" data-operator="">%</button>
+            <button class="btn btn-operator" data-operator="">÷</button>
+            <!-- Row 2 -->
+            <button class="btn btn-digit" data-number="">7</button>
+            <button class="btn btn-digit" data-number="">8</button>
+            <button class="btn btn-digit" data-number="">9</button>
+            <button class="btn btn-operator" data-operator="">×</button>
+            <!-- Row 3 -->
+            <button class="btn btn-digit" data-number="">4</button>
+            <button class="btn btn-digit" data-number="">5</button>
+            <button class="btn btn-digit" data-number="">6</button>
+            <button class="btn btn-operator" data-operator="">-</button>
+            <!-- Row 4 -->
+            <button class="btn btn-digit" data-number="">1</button>
+            <button class="btn btn-digit" data-number="">2</button>
+            <button class="btn btn-digit" data-number="">3</button>
+            <button class="btn btn-operator" data-operator="">+</button>
+            <!-- Row 5 -->
+            <button class="btn btn-digit btn-zero" data-number="">0</button>
+            <button class="btn btn-digit" data-number="">.</button>
+            <button class="btn btn-operator" data-equals="">=</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Calculator Class for better organization ---
+        class Calculator {
+            constructor(previousOperandTextElement, currentOperandTextElement) {
+                this.previousOperandTextElement = previousOperandTextElement;
+                this.currentOperandTextElement = currentOperandTextElement;
+                this.clear();
+            }
+
+            // Resets the calculator to its default state
+            clear() {
+                this.currentOperand = '0';
+                this.previousOperand = '';
+                this.operation = undefined;
+                this.updateDisplay();
+            }
+
+            // Deletes the last digit from the current operand
+            delete() {
+                if (this.currentOperand.length <= 1) {
+                    this.currentOperand = '0';
+                } else {
+                    this.currentOperand = this.currentOperand.toString().slice(0, -1);
+                }
+            }
+
+            // Appends a number or decimal point to the current operand
+            appendNumber(number) {
+                if (number === '.' && this.currentOperand.includes('.')) return; // Prevent multiple decimals
+                if (this.currentOperand === '0' && number !== '.') {
+                    this.currentOperand = number.toString();
+                } else {
+                    this.currentOperand = this.currentOperand.toString() + number.toString();
+                }
+            }
+
+            // Sets the chosen operation and prepares for the next number
+            chooseOperation(operation) {
+                if (this.currentOperand === '' && this.previousOperand !== '') {
+                    this.operation = operation;
+                    return
+                }
+                if (this.currentOperand === '') return;
+                if (this.previousOperand !== '') {
+                    this.compute();
+                }
+                this.operation = operation;
+                this.previousOperand = this.currentOperand;
+                this.currentOperand = '';
+            }
+
+            // Performs the calculation
+            compute() {
+                let computation;
+                const prev = parseFloat(this.previousOperand);
+                const current = parseFloat(this.currentOperand);
+                if (isNaN(prev) || isNaN(current)) return;
+
+                switch (this.operation) {
+                    case '+':
+                        computation = prev + current;
+                        break;
+                    case '-':
+                        computation = prev - current;
+                        break;
+                    case '×':
+                        computation = prev * current;
+                        break;
+                    case '÷':
+                        if (current === 0) {
+                           alert("Cannot divide by zero!");
+                           this.clear();
+                           return;
+                        }
+                        computation = prev / current;
+                        break;
+                    case '%':
+                        computation = prev % current;
+                        break;
+                    default:
+                        return;
+                }
+                this.currentOperand = computation;
+                this.operation = undefined;
+                this.previousOperand = '';
+            }
+
+            // Formats the number for display (e.g., adds commas)
+            getDisplayNumber(number) {
+                const stringNumber = number.toString();
+                const integerDigits = parseFloat(stringNumber.split('.')[0]);
+                const decimalDigits = stringNumber.split('.')[1];
+                let integerDisplay;
+                if (isNaN(integerDigits)) {
+                    integerDisplay = '';
+                } else {
+                    integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0 });
+                }
+                if (decimalDigits != null) {
+                    return `${integerDisplay}.${decimalDigits}`;
+                } else {
+                    return integerDisplay;
+                }
+            }
+
+            // Updates the text content of the display elements
+            updateDisplay() {
+                this.currentOperandTextElement.innerText = this.getDisplayNumber(this.currentOperand);
+                if (this.operation != null) {
+                    this.previousOperandTextElement.innerText = `${this.getDisplayNumber(this.previousOperand)} ${this.operation}`;
+                } else {
+                    this.previousOperandTextElement.innerText = '';
+                }
+            }
+        }
+
+        // --- Event Listeners ---
+        const numberButtons = document.querySelectorAll('[data-number]');
+        const operatorButtons = document.querySelectorAll('[data-operator]');
+        const equalsButton = document.querySelector('[data-equals]');
+        const deleteButton = document.querySelector('[data-delete]');
+        const allClearButton = document.querySelector('[data-all-clear]');
+        const previousOperandTextElement = document.querySelector('[data-previous-operand]');
+        const currentOperandTextElement = document.querySelector('[data-current-operand]');
+
+        // Create a new calculator object
+        const calculator = new Calculator(previousOperandTextElement, currentOperandTextElement);
+
+        numberButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                calculator.appendNumber(button.innerText);
+                calculator.updateDisplay();
+            });
+        });
+
+        operatorButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                calculator.chooseOperation(button.innerText);
+                calculator.updateDisplay();
+            });
+        });
+
+        equalsButton.addEventListener('click', button => {
+            calculator.compute();
+            calculator.updateDisplay();
+        });
+
+        allClearButton.addEventListener('click', button => {
+            calculator.clear();
+            calculator.updateDisplay();
+        });
+
+        deleteButton.addEventListener('click', button => {
+            calculator.delete();
+            calculator.updateDisplay();
+        });
+
+
+        // --- Theme Toggle Logic ---
+        const themeToggle = document.getElementById('themeToggleCheckbox');
+        const htmlElement = document.documentElement;
+
+        // Function to set the theme
+        const setTheme = (theme) => {
+            htmlElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggle.checked = theme === 'light';
+        };
+
+        // Event listener for the toggle
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                setTheme('light');
+            } else {
+                setTheme('dark');
+            }
+        });
+
+        // Load saved theme from localStorage or default to dark
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+    </script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+
+<iframe id="nr-ext-rsicon" style="position: absolute; display: none; width: 50px; height: 50px; z-index: 2147483647; border-style: none; background: transparent;" src="./calculatoR_files/saved_resource.html"></iframe></body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
